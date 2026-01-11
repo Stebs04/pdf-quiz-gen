@@ -25,6 +25,7 @@ Non serve saper programmare. Segui questi passi:
 ### 1. Scarica
 * Clicca su **<> Code** in alto a destra > **Download ZIP**.
 * Estrai la cartella sul tuo PC.
+* Andando nella sezione release e scarica la versione che più preferisci
 
 ### 2. Ottieni la Chiave (Gratis)
 * Il software usa l'IA di Google. Ti serve una "chiave" per attivarlo.
