@@ -1,58 +1,86 @@
 @echo off
-title Installatore Automatico Quiz Gen
+setlocal
+title Installazione e Avvio Quiz AI Generator
 cls
+
 echo ========================================================
-echo   CONFIGURAZIONE AUTOMATICA GENERATORE QUIZ (1 Click)
+echo      GENERATORE QUIZ AI - SETUP AUTOMATICO
 echo ========================================================
 echo.
 
-REM 1. CONTROLLO PYTHON
-echo [1/4] Controllo se Python e' installato...
+REM --- 1. CONTROLLO PYTHON ---
+echo [1/5] Verifica installazione Python...
 python --version >nul 2>&1
 if %errorlevel% neq 0 (
     echo.
     echo [ERRORE] Python non trovato!
-    echo Devi installare Python 3.12+ dal sito ufficiale: https://www.python.org/downloads/
-    echo IMPORTANTE: Spunta la casella "Add Python to PATH" durante l'installazione.
+    echo.
+    echo Per favore installa Python dal sito ufficiale: https://www.python.org/downloads/
+    echo IMPORTANTE: Durante l'installazione, metti la spunta su "Add Python to PATH".
+    echo.
     pause
     exit
 )
-echo Python trovato. Procedo.
-echo.
+echo    -> Python trovato.
 
-REM 2. CREAZIONE AMBIENTE VIRTUALE (Se non esiste)
+REM --- 2. CREAZIONE AMBIENTE VIRTUALE ---
 if not exist "venv" (
-    echo [2/4] Creazione della cartella segreta 'venv' (Solo la prima volta)...
+    echo.
+    echo [2/5] Creazione ambiente virtuale (prima volta, attendere)...
     python -m venv venv
+) else (
+    echo [2/5] Ambiente virtuale gia' pronto.
+)
+
+REM --- 3. ATTIVAZIONE E INSTALLAZIONE DIPENDENZE ---
+echo [3/5] Verifica librerie...
+call venv\Scripts\activate
+
+REM Controllo veloce se streamlit esiste, altrimenti installa tutto
+pip show streamlit >nul 2>&1
+if %errorlevel% neq 0 (
+    echo    -> Installazione dipendenze in corso... (Potrebbe volerci un minuto)
+    pip install -r requirements.txt
     if %errorlevel% neq 0 (
-        echo Errore nella creazione del venv.
+        echo [ERRORE] Qualcosa e' andato storto nell'installazione delle librerie.
         pause
         exit
     )
 ) else (
-    echo [2/4] Ambiente virtuale gia' esistente. Salto creazione.
+    echo    -> Librerie gia' installate.
 )
 
-REM 3. INSTALLAZIONE LIBRERIE
-echo.
-echo [3/4] Attivazione ambiente e installazione dipendenze...
-call venv\Scripts\activate
-
-REM Qui controlliamo se Streamlit è già installato per non perdere tempo ogni volta
-pip show streamlit >nul 2>&1
-if %errorlevel% neq 0 (
-    echo Installazione librerie in corso (potrebbe volerci un minuto)...
-    pip install -r requirements.txt
+REM --- 4. CONFIGURAZIONE CHIAVE API (INTERATTIVA) ---
+echo [4/5] Controllo Chiave di Sicurezza...
+if not exist ".env" (
+    echo.
+    echo ========================================================
+    echo  ATTENZIONE: Manca la Chiave API di Google (Serve per l'IA)
+    echo ========================================================
+    echo.
+    echo  1. Vai su: https://aistudio.google.com/app/apikey
+    echo  2. Crea una chiave e copiala.
+    echo.
+    set /p APIKEY="Incolla qui la tua chiave (tasto destro per incollare) e premi INVIO: "
+    
+    REM Scriviamo la chiave nel file .env
+    echo GOOGLE_API_KEY=!APIKEY!> .env
+    
+    echo.
+    echo    -> Chiave salvata con successo!
 ) else (
-    echo Librerie gia' installate.
+    echo    -> File .env trovato. Procedo.
 )
 
-REM 4. AVVIO
+REM --- 5. AVVIO APP ---
 echo.
-echo [4/4] ==========================================
-echo       TUTTO PRONTO! AVVIO DELL'APP IN CORSO...
-echo       ==========================================
+echo [5/5] Avvio del programma...
 echo.
-streamlit run src\app.py
+echo ========================================================
+echo    PREMI CTRL+C NELLA FINESTRA NERA PER CHIUDERE
+echo ========================================================
+echo.
+
+streamlit run src/app.py
 
 pause
