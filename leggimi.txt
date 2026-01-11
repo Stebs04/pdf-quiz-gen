@@ -1,20 +1,37 @@
-GUIDA VELOCE - GENERATORE QUIZ AI
+GUIDA RAPIDA - UNIVERSITY QUIZ GENERATOR AI
+=================================================
 
-Ciao! Per usare questo programma devi fare solo 2 cose.
+Ciao! Ecco come avviare il tuo generatore di quiz in 2 minuti.
 
-1. INSTALLA PYTHON (Se non ce l'hai già)
-   - Scaricalo qui: https://www.python.org/downloads/
-   - ⚠️ FONDAMENTALE: Quando lo installi, metti la spunta su "Add Python to PATH" (è una casellina in basso nella prima schermata).
+REQUISITI
+---------
+1. Python installato sul PC.
+   Se non ce l'hai, scaricalo da: https://www.python.org/downloads/
+   ⚠️ IMPORTANTE: Durante l'installazione, devi mettere la spunta sulla casella "Add Python to PATH".
 
-2. CONFIGURA LA TUA CHIAVE
-   - Vai su: https://aistudio.google.com/app/apikey e crea una chiave gratis.
-   - Apri la cartella di questo programma.
-   - Crea un file di testo, rinominalo ".env" (senza .txt).
-   - Scrivici dentro: GOOGLE_API_KEY=la_tua_chiave_copiata
-   - Salva.
+ISTRUZIONI DI AVVIO
+-------------------
+1. Entra nella cartella di questo programma.
 
-3. GIOCA!
-   - Fai doppio click sul file "AVVIA_QUIZ.bat".
-   - Aspetta che faccia le sue magie. Si aprirà da solo il sito.
+2. Fai DOPPIO CLICK sul file "start.bat" (o solo "start" se non vedi le estensioni).
+
+3. Se Windows ti mostra una schermata blu ("PC protetto da Windows"):
+   - Clicca su "Ulteriori informazioni" (scritta piccola).
+   - Clicca su "Esegui comunque".
+   (È normale, succede perché è un programma "fatto in casa").
+
+4. Al primo avvio, una finestra nera ti chiederà la CHIAVE GOOGLE.
+   - È gratuita e serve per usare il cervello dell'IA.
+   - Prendila qui: https://aistudio.google.com/app/apikey
+   - Copiala, incollala nella finestra nera e premi INVIO.
+
+5. Finito! Il programma si aprirà nel tuo browser.
+
+COME USARLO
+-----------
+1. Carica il tuo PDF di studio nella barra sinistra.
+2. (Opzionale) Carica vecchi esami nella sezione "Esempi" per insegnare all'IA lo stile del prof.
+3. Clicca il pulsante colorato "GENERA SIMULAZIONE".
+4. Mettiti alla prova!
 
 Buono studio!
