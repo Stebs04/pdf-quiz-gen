@@ -7,25 +7,35 @@ REQUISITI
 ---------
 1. Python installato sul PC.
    Se non ce l'hai, scaricalo da: https://www.python.org/downloads/
-   ⚠️ IMPORTANTE: Durante l'installazione, devi mettere la spunta sulla casella "Add Python to PATH".
+   ⚠️ UTENTI WINDOWS: Durante l'installazione, spunta la casella "Add Python to PATH".
 
-ISTRUZIONI DI AVVIO
--------------------
+ISTRUZIONI DI AVVIO (WINDOWS)
+-----------------------------
 1. Entra nella cartella di questo programma.
-
-2. Fai DOPPIO CLICK sul file "start.bat" (o solo "start" se non vedi le estensioni).
-
+2. Fai DOPPIO CLICK sul file "start.bat" (o solo "start").
 3. Se Windows ti mostra una schermata blu ("PC protetto da Windows"):
-   - Clicca su "Ulteriori informazioni" (scritta piccola).
+   - Clicca su "Ulteriori informazioni".
    - Clicca su "Esegui comunque".
-   (È normale, succede perché è un programma "fatto in casa").
+   (È normale per i programmi non firmati digitalmente).
 
-4. Al primo avvio, una finestra nera ti chiederà la CHIAVE GOOGLE.
-   - È gratuita e serve per usare il cervello dell'IA.
-   - Prendila qui: https://aistudio.google.com/app/apikey
-   - Copiala, incollala nella finestra nera e premi INVIO.
+ISTRUZIONI DI AVVIO (MAC & LINUX)
+---------------------------------
+1. Apri il Terminale all'interno della cartella del progetto.
+2. Solo la prima volta, rendi lo script eseguibile scrivendo:
+   chmod +x start.sh
+   (e premi Invio)
+3. Avvia il programma scrivendo:
+   ./start.sh
+   (e premi Invio)
 
-5. Finito! Il programma si aprirà nel tuo browser.
+CONFIGURAZIONE INIZIALE (PER TUTTI)
+-----------------------------------
+Al primo avvio, una finestra nera ti chiederà la CHIAVE GOOGLE.
+- È gratuita e serve per usare il cervello dell'IA.
+- Prendila qui: https://aistudio.google.com/app/apikey
+- Copiala, incollala nella finestra nera e premi INVIO.
+
+Finito! Il programma si aprirà nel tuo browser.
 
 COME USARLO
 -----------

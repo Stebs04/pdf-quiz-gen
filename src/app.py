@@ -10,6 +10,9 @@ load_dotenv()
 
 # --- 1. CONFIGURAZIONE PAGINA E CSS PERSONALIZZATO ---
 st.set_page_config(page_title="QuizGen AI", page_icon="🎓", layout="wide")
+logo_path = os.path.join(os.path.dirname(__file__), "assets", "logo.png")
+if os.path.exists(logo_path):
+    st.logo(logo_path, icon_image=logo_path)
 
 # Iniezione di CSS
 st.markdown("""
@@ -85,7 +88,14 @@ api_key = os.getenv("GOOGLE_API_KEY")
 col_logo, col_title = st.columns([1, 5])
 
 with col_logo:
-    st.markdown("<h1 style='text-align: center;'>🎓</h1>", unsafe_allow_html=True)
+    # Definiamo il percorso del logo (relativo a questo file app.py)
+    logo_path = os.path.join(os.path.dirname(__file__), "assets", "logo.png")
+    
+    # Se il file esiste, lo mostriamo, altrimenti usiamo l'emoji come fallback
+    if os.path.exists(logo_path):
+        st.image(logo_path, use_container_width=True)
+    else:
+        st.markdown("<h1 style='text-align: center;'>🎓</h1>", unsafe_allow_html=True)
 
 with col_title:
     st.title("Generatore di quiz")
