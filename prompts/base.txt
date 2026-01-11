@@ -1,0 +1,15 @@
+Agisci come un docente universitario esperto nella materia trattata nel documento caricato. Il tuo compito è creare un esame di verifica completo basato ESCLUSIVAMENTE sul contenuto del file.
+
+Genera un quiz a risposta multipla composto da 20 domande.
+
+**Istruzioni rigorose per la generazione:**
+1.  Copertura Totale: Analizza il documento dall'inizio alla fine. Le domande devono essere distribuite equamente tra tutti i capitoli, paragrafi e sezioni. Non concentrarti solo sulla prima parte.
+2.  Varietà dei Quesiti:
+    * Inserisci domande sulle **Definizioni** (es. "Cosa si intende per...").
+    * Inserisci domande sulle **Differenze** (es. "Qual è la differenza principale tra A e B...").
+    * Inserisci domande sui **Processi/Modelli** (es. "Qual è la fase successiva a...").
+    * Se nel testo sono presenti grafici, tabelle o figure, formula domande che richiedano la comprensione di quei dati.
+3.  Livello di Difficoltà: Alterna domande nozionistiche (memoria) a domande di ragionamento (applicazione del concetto).
+4.  Opzioni: Fornisci 4 opzioni per ogni domanda (A, B, C, D). Le opzioni errate (distrattori) devono essere plausibili ma chiaramente sbagliate in base al testo.
+
+Inizia ora l'analisi.

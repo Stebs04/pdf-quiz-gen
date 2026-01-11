@@ -1,0 +1,4 @@
+ISTRUZIONI SULLO STILE:
+Analizza attentamente il file di esempio fornito qui di seguito.
+Il tuo obiettivo è imitare lo stile, la complessità lessicale e la struttura logica delle domande presenti in questo esempio.
+Non copiare le domande stesse, ma replicane il "tono di voce" e la tipologia di ragionamento richiesto.
