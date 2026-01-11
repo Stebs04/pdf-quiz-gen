@@ -1,54 +1,56 @@
 import google.generativeai as genai
 import time
 import os
-import uuid  # Libreria per creare nomi casuali unici
+import uuid 
 
 def carica_file_su_gemini(uploaded_file):
     """
-    Gestisce il caricamento su Gemini in modo sicuro per Windows.
-    Usa nomi di file univoci e gestisce gli errori di cancellazione.
+    Funzione robusta per caricare file su Gemini.
+    Gestisce:
+    1. Salvataggio temporaneo su disco (necessario per le API).
+    2. Nomi univoci (UUID) per evitare conflitti su Windows.
+    3. Upload e Attesa attiva (polling) finché Google non ha processato il file.
+    4. Pulizia automatica del file temporaneo.
     """
     
-    # 1. CREIAMO UN NOME UNIVOCO
-    # Invece di "temp.pdf", generiamo "temp_3a4b5c...pdf"
-    # Così se carichi 2 file, avranno nomi diversi e non andranno in conflitto.
+    # Generiamo un nome univoco per evitare che due file si sovrascrivano
+    # es: temp_8f3a2b1c.pdf
     nome_file_temporaneo = f"temp_{uuid.uuid4()}.pdf"
     
     try:
-        # 2. SALVATAGGIO SU DISCO
+        # 1. Scriviamo il file ricevuto dalla RAM al Disco
         with open(nome_file_temporaneo, "wb") as f:
             f.write(uploaded_file.getbuffer())
 
-        # 3. UPLOAD SU GOOGLE
-        # Determiniamo il tipo di file (pdf, jpg, png)
-        mime_type = "application/pdf" # Default
+        # 2. Determiniamo il tipo MIME corretto (PDF o Immagine)
+        mime_type = "application/pdf"
         if uploaded_file.type:
             mime_type = uploaded_file.type
             
-        print(f"Caricamento file temporaneo: {nome_file_temporaneo}...")
+        # 3. Caricamento su server Google
+        print(f"--> Uploading: {nome_file_temporaneo} ({mime_type})")
         file_gemini = genai.upload_file(path=nome_file_temporaneo, mime_type=mime_type)
         
-        # 4. ATTESA ELABORAZIONE (Polling)
+        # 4. Loop di attesa (Google deve "leggere" il file prima di usarlo)
         while file_gemini.state.name == "PROCESSING":
-            time.sleep(2)
-            file_gemini = genai.get_file(file_gemini.name)
+            time.sleep(1) # Aspettiamo 1 secondo
+            file_gemini = genai.get_file(file_gemini.name) # Chiediamo lo stato aggiornato
 
+        # 5. Verifica finale
         if file_gemini.state.name == "FAILED":
-            raise ValueError("Gemini non è riuscito a elaborare questo file.")
+            raise ValueError("Errore lato Google: impossibile processare il file.")
 
-        print(f"File pronto su Gemini: {file_gemini.name}")
+        print(f"--> Ready: {file_gemini.name}")
         return file_gemini
 
     finally:
-        # 5. PULIZIA SICURA (Anti-Crash)
-        # Il blocco 'finally' viene eseguito SEMPRE, anche se c'è un errore prima.
-        
-        # Aspettiamo 1 secondo per dare tempo a Windows di "rilasciare" il file
-        time.sleep(1)
-        
+        # 6. Pulizia (Blocco Finally viene eseguito SEMPRE)
+        # Cerchiamo di cancellare il file temporaneo per non riempire il disco
+        time.sleep(0.5) # Piccolo delay per permettere a Windows di rilasciare il file
         if os.path.exists(nome_file_temporaneo):
             try:
                 os.remove(nome_file_temporaneo)
-            except Exception as e:
-                # Se Windows blocca il file, lo scriviamo solo nel terminale ma NON fermiamo il programma
-                print(f"⚠️ Avviso Windows: Impossibile cancellare subito {nome_file_temporaneo}. Verrà eliminato al riavvio.")
+            except Exception:
+                # Se non riusciamo a cancellarlo subito (file lock), lo ignoriamo.
+                # Non è critico per il funzionamento dell'app.
+                print(f"Info: Impossibile cancellare subito {nome_file_temporaneo}")
