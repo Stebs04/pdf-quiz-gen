@@ -5,7 +5,9 @@ import json
 from dotenv import load_dotenv
 from utils import carica_file_su_gemini
 
+# Carica le variabili d'ambiente (il file .env)
 load_dotenv()
+
 st.set_page_config(page_title="Quiz Interattivo AI", page_icon="🎮", layout="centered")
 
 # --- FUNZIONI DI SUPPORTO ---
@@ -31,155 +33,163 @@ def pulisci_json(testo_response):
         return testo_response[start:end]
     return testo_response
 
-# --- LOGIN ---
-def check_password():
-    password_segreta = os.getenv("APP_PASSWORD")
-    if not password_segreta: return True
-    if st.session_state.get("authenticated", False): return True
-
-    pwd = st.sidebar.text_input("🔒 Password:", type="password")
-    if pwd == password_segreta:
-        st.session_state["authenticated"] = True
-        st.rerun()
-    elif pwd:
-        st.sidebar.error("Errata ❌")
-    return False
-
-# --- SESSION STATE ---
+# --- SESSION STATE (Memoria del Gioco) ---
 if "quiz_data" not in st.session_state: st.session_state.quiz_data = None
 if "current_index" not in st.session_state: st.session_state.current_index = 0
 if "score" not in st.session_state: st.session_state.score = 0
 if "answer_submitted" not in st.session_state: st.session_state.answer_submitted = False
 
+# --- CONFIGURAZIONE API ---
 api_key = os.getenv("GOOGLE_API_KEY")
 
-if check_password():
-    st.title("🎮 Quiz Interattivo Universitario")
+st.title("🎮 Quiz Interattivo Universitario")
 
-    if not api_key:
-        st.error("Manca la API Key nel file .env")
-        st.stop()
+# Controllo Chiave: Se non c'è nel file .env, mostriamo un avviso gentile
+if not api_key:
+    st.warning("⚠️ Chiave API non trovata.")
+    st.info("Per usare questa app, crea un file chiamato '.env' nella cartella principale e scrivici dentro: GOOGLE_API_KEY=la_tua_chiave")
+    st.stop()
+
+genai.configure(api_key=api_key)
+
+# --- SIDEBAR (Input) ---
+with st.sidebar:
+    st.header("📂 Carica i tuoi documenti")
+    uploaded_file_studio = st.file_uploader("1. Documento Studio (PDF/IMG)", type=["pdf", "png", "jpg"], key="studio")
+    st.markdown("---")
     
-    genai.configure(api_key=api_key)
+    # MODIFICA: accept_multiple_files=True permette di caricare più esempi
+    uploaded_files_esempi = st.file_uploader(
+        "2. Esempi di Stile (Caricane quanti ne vuoi)", 
+        type=["pdf", "png", "jpg"], 
+        key="esempi", 
+        accept_multiple_files=True
+    )
+    st.markdown("---")
+    
+    if st.button("🚀 Genera Nuovo Quiz", type="primary"):
+        # Reset del gioco
+        st.session_state.quiz_data = None
+        st.session_state.current_index = 0
+        st.session_state.score = 0
+        st.session_state.answer_submitted = False
+        st.rerun()
 
-    # --- SIDEBAR ---
-    with st.sidebar:
-        st.header("📂 Input")
-        uploaded_file_studio = st.file_uploader("1. Documento Studio", type=["pdf", "png", "jpg"], key="studio")
-        st.markdown("---")
-        uploaded_file_esempi = st.file_uploader("2. Esempio Stile (Opzionale)", type=["pdf", "png", "jpg"], key="esempi")
-        st.markdown("---")
-        
-        if st.button("🚀 Genera Nuovo Quiz", type="primary"):
-            st.session_state.quiz_data = None
-            st.session_state.current_index = 0
-            st.session_state.score = 0
-            st.session_state.answer_submitted = False
-            st.rerun()
+# --- LOGICA APPLICAZIONE ---
+if st.session_state.quiz_data is None:
+    if uploaded_file_studio:
+        with st.spinner("🧠 Sto leggendo i file e analizzando lo stile..."):
+            try:
+                # 1. LEGGIAMO I PROMPT BASE
+                prompt_base_text = leggi_prompt("base.txt")
+                prompt_style_text = leggi_prompt("style.txt")
 
-    # --- LOGICA ---
-    if st.session_state.quiz_data is None:
-        if uploaded_file_studio:
-            with st.spinner("🧠 Sto leggendo i file di prompt e analizzando il documento..."):
-                try:
-                    # 1. CARICHIAMO I PROMPT DAI FILE DI TESTO
-                    prompt_base_text = leggi_prompt("base.txt")
-                    prompt_style_text = leggi_prompt("style.txt")
+                # 2. COSTRUIAMO LA LISTA MULTIMODALE
+                contenuto_richiesta = []
+                
+                # Aggiungiamo le istruzioni principali
+                contenuto_richiesta.append(prompt_base_text)
 
-                    # 2. COSTRUIAMO LA LISTA PER GEMINI
-                    contenuto_richiesta = []
+                # Aggiungiamo il documento di studio
+                st.text("Caricamento documento studio su Gemini...")
+                file_studio_proc = carica_file_su_gemini(uploaded_file_studio)
+                contenuto_richiesta.append("--- INIZIO DOCUMENTO STUDIO ---")
+                contenuto_richiesta.append(file_studio_proc)
+                contenuto_richiesta.append("--- FINE DOCUMENTO STUDIO ---")
+
+                # Aggiungiamo GLI esempi (Ciclo su tutti i file caricati)
+                if uploaded_files_esempi:
+                    contenuto_richiesta.append(prompt_style_text)
+                    contenuto_richiesta.append("--- INIZIO DOCUMENTI ESEMPIO ---")
                     
-                    # Aggiungiamo il prompt base (Docente Esperto...)
-                    contenuto_richiesta.append(prompt_base_text)
-
-                    # Aggiungiamo il documento di studio
-                    st.text("Upload documento studio...")
-                    file_studio_proc = carica_file_su_gemini(uploaded_file_studio)
-                    contenuto_richiesta.append("--- INIZIO DOCUMENTO STUDIO ---")
-                    contenuto_richiesta.append(file_studio_proc)
-                    contenuto_richiesta.append("--- FINE DOCUMENTO STUDIO ---")
-
-                    # Aggiungiamo esempi e prompt di stile (se presenti)
-                    if uploaded_file_esempi:
-                        st.text("Upload documento esempi...")
-                        file_esempi_proc = carica_file_su_gemini(uploaded_file_esempi)
-                        # Qui inseriamo il testo letto da style.txt
-                        contenuto_richiesta.append(prompt_style_text)
-                        contenuto_richiesta.append(file_esempi_proc)
-
-                    # 3. OVERRIDE JSON (FONDAMENTALE)
-                    # Anche se il file di testo chiede un output formattato per umani,
-                    # noi forziamo Gemini a darci JSON per far funzionare l'app.
-                    contenuto_richiesta.append("""
+                    for i, file_esempio in enumerate(uploaded_files_esempi):
+                        st.text(f"Caricamento esempio {i+1}: {file_esempio.name}...")
+                        file_proc = carica_file_su_gemini(file_esempio)
+                        contenuto_richiesta.append(f"Esempio #{i+1}:")
+                        contenuto_richiesta.append(file_proc)
                     
-                    ⚠️ ISTRUZIONE TECNICA PRIORITARIA ⚠️
-                    Indipendentemente dal formato richiesto sopra, DEVI rispondere 
-                    ESCLUSIVAMENTE con un ARRAY JSON valido per permettere al software di funzionare.
-                    
-                    Struttura JSON obbligatoria:
-                    [
-                        {
-                            "domanda": "...",
-                            "opzioni": ["A", "B", "C", "D"],
-                            "corretta": 0,  <-- (Int: 0=A, 1=B, 2=C, 3=D)
-                            "spiegazione": "..."
-                        }
-                    ]
-                    """)
+                    contenuto_richiesta.append("--- FINE DOCUMENTI ESEMPIO ---")
 
-                    # 4. Chiamata a Gemini
-                    model = genai.GenerativeModel('gemini-3-flash-preview')
-                    response = model.generate_content(contenuto_richiesta)
-                    
-                    json_text = pulisci_json(response.text)
-                    st.session_state.quiz_data = json.loads(json_text)
-                    st.rerun()
+                # 3. FORZATURA JSON (Il trucco per far funzionare l'app)
+                contenuto_richiesta.append("""
+                ⚠️ ISTRUZIONE TECNICA FINALE ⚠️
+                Rispondi ESCLUSIVAMENTE con un ARRAY JSON valido.
+                Struttura obbligatoria:
+                [
+                    {
+                        "domanda": "...",
+                        "opzioni": ["A", "B", "C", "D"],
+                        "corretta": 0,
+                        "spiegazione": "..."
+                    }
+                ]
+                """)
 
-                except Exception as e:
-                    st.error(f"Errore: {e}")
-        else:
-            st.info("👈 Carica i documenti per iniziare.")
-
-    # --- GIOCO INTERATTIVO (Uguale a prima) ---
-    elif st.session_state.current_index < len(st.session_state.quiz_data):
-        q = st.session_state.quiz_data[st.session_state.current_index]
-        st.progress((st.session_state.current_index + 1) / len(st.session_state.quiz_data), text=f"Domanda {st.session_state.current_index + 1}")
-        st.subheader(q["domanda"])
-        
-        user_choice = st.radio("Scegli:", q["opzioni"], index=None, disabled=st.session_state.answer_submitted)
-        col1, col2 = st.columns(2)
-        
-        if not st.session_state.answer_submitted:
-            if col1.button("✅ Conferma"):
-                if user_choice:
-                    st.session_state.answer_submitted = True
-                    st.rerun()
-                else:
-                    st.warning("Seleziona una risposta!")
-        else:
-            correct_idx = q["corretta"]
-            chosen_idx = q["opzioni"].index(user_choice) if user_choice in q["opzioni"] else -1
-            
-            if chosen_idx == correct_idx:
-                st.success(f"Esatto! 🎉\n\n{q['spiegazione']}")
-            else:
-                st.error(f"Sbagliato. Risposta giusta: {q['opzioni'][correct_idx]}")
-                st.info(f"{q['spiegazione']}")
-            
-            if col2.button("Avanti ➡️"):
-                if chosen_idx == correct_idx: st.session_state.score += 1
-                st.session_state.answer_submitted = False
-                st.session_state.current_index += 1
+                # 4. CHIAMATA A GEMINI
+                model = genai.GenerativeModel('gemini-3-flash-preview')
+                response = model.generate_content(contenuto_richiesta)
+                
+                # 5. PARSING
+                json_text = pulisci_json(response.text)
+                st.session_state.quiz_data = json.loads(json_text)
                 st.rerun()
 
+            except Exception as e:
+                st.error(f"Errore durante la generazione: {e}")
+                st.error("Prova a ricaricare la pagina o controlla la tua connessione.")
     else:
-        st.balloons()
-        score = st.session_state.score
-        total = len(st.session_state.quiz_data)
-        st.title(f"Punteggio: {score}/{total}")
-        if st.button("Ricomincia"):
-            st.session_state.quiz_data = None
-            st.session_state.current_index = 0
-            st.session_state.score = 0
+        st.info("👈 Carica il documento di studio per iniziare.")
+
+# --- FASE DI GIOCO (Rimasta uguale) ---
+elif st.session_state.current_index < len(st.session_state.quiz_data):
+    q = st.session_state.quiz_data[st.session_state.current_index]
+    
+    # Barra progresso
+    prog = (st.session_state.current_index + 1) / len(st.session_state.quiz_data)
+    st.progress(prog, text=f"Domanda {st.session_state.current_index + 1} di {len(st.session_state.quiz_data)}")
+    
+    st.subheader(q["domanda"])
+    
+    user_choice = st.radio("La tua risposta:", q["opzioni"], index=None, disabled=st.session_state.answer_submitted)
+    col1, col2 = st.columns(2)
+    
+    if not st.session_state.answer_submitted:
+        if col1.button("✅ Conferma"):
+            if user_choice:
+                st.session_state.answer_submitted = True
+                st.rerun()
+            else:
+                st.warning("Devi scegliere una risposta!")
+    else:
+        correct_idx = q["corretta"]
+        chosen_idx = q["opzioni"].index(user_choice) if user_choice in q["opzioni"] else -1
+        
+        if chosen_idx == correct_idx:
+            st.success(f"Esatto! 🎉\n\n{q['spiegazione']}")
+        else:
+            st.error(f"Sbagliato. La risposta giusta era: {q['opzioni'][correct_idx]}")
+            st.info(q['spiegazione'])
+        
+        if col2.button("Prossima ➡️"):
+            if chosen_idx == correct_idx: st.session_state.score += 1
             st.session_state.answer_submitted = False
+            st.session_state.current_index += 1
             st.rerun()
+
+else:
+    st.balloons()
+    score = st.session_state.score
+    total = len(st.session_state.quiz_data)
+    perc = int(score/total * 100)
+    st.title(f"Risultato: {score}/{total} ({perc}%)")
+    
+    if perc > 80: st.success("Grande! Sei pronto.")
+    elif perc > 50: st.warning("Ripassa un po'.")
+    else: st.error("Devi studiare di più.")
+    
+    if st.button("Ricomincia da capo"):
+        st.session_state.quiz_data = None
+        st.session_state.current_index = 0
+        st.session_state.score = 0
+        st.session_state.answer_submitted = False
+        st.rerun()

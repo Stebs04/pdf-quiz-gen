@@ -1,0 +1,20 @@
+GUIDA VELOCE - GENERATORE QUIZ AI
+
+Ciao! Per usare questo programma devi fare solo 2 cose.
+
+1. INSTALLA PYTHON (Se non ce l'hai già)
+   - Scaricalo qui: https://www.python.org/downloads/
+   - ⚠️ FONDAMENTALE: Quando lo installi, metti la spunta su "Add Python to PATH" (è una casellina in basso nella prima schermata).
+
+2. CONFIGURA LA TUA CHIAVE
+   - Vai su: https://aistudio.google.com/app/apikey e crea una chiave gratis.
+   - Apri la cartella di questo programma.
+   - Crea un file di testo, rinominalo ".env" (senza .txt).
+   - Scrivici dentro: GOOGLE_API_KEY=la_tua_chiave_copiata
+   - Salva.
+
+3. GIOCA!
+   - Fai doppio click sul file "AVVIA_QUIZ.bat".
+   - Aspetta che faccia le sue magie. Si aprirà da solo il sito.
+
+Buono studio!
