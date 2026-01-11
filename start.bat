@@ -1,86 +1,89 @@
 @echo off
 setlocal
-title Installazione e Avvio Quiz AI Generator
+title Installazione Quiz AI
 cls
 
-echo ========================================================
-echo      GENERATORE QUIZ AI - SETUP AUTOMATICO
-echo ========================================================
+echo ==========================================
+echo   SETUP GENERATORE QUIZ (Versione Stabile)
+echo ==========================================
 echo.
 
-REM --- 1. CONTROLLO PYTHON ---
-echo [1/5] Verifica installazione Python...
+REM --- 1. CERCO PYTHON (Metodo Lineare) ---
+echo [1/4] Cerco Python...
+
+REM Provo 'python'
 python --version >nul 2>&1
-if %errorlevel% neq 0 (
-    echo.
-    echo [ERRORE] Python non trovato!
-    echo.
-    echo Per favore installa Python dal sito ufficiale: https://www.python.org/downloads/
-    echo IMPORTANTE: Durante l'installazione, metti la spunta su "Add Python to PATH".
-    echo.
-    pause
-    exit
-)
-echo    -> Python trovato.
-
-REM --- 2. CREAZIONE AMBIENTE VIRTUALE ---
-if not exist "venv" (
-    echo.
-    echo [2/5] Creazione ambiente virtuale (prima volta, attendere)...
-    python -m venv venv
-) else (
-    echo [2/5] Ambiente virtuale gia' pronto.
+if %errorlevel% equ 0 (
+    set PYTHON_CMD=python
+    goto python_trovato
 )
 
-REM --- 3. ATTIVAZIONE E INSTALLAZIONE DIPENDENZE ---
-echo [3/5] Verifica librerie...
+REM Provo 'py' (Launcher di Windows)
+py --version >nul 2>&1
+if %errorlevel% equ 0 (
+    set PYTHON_CMD=py
+    goto python_trovato
+)
+
+REM Provo 'python3'
+python3 --version >nul 2>&1
+if %errorlevel% equ 0 (
+    set PYTHON_CMD=python3
+    goto python_trovato
+)
+
+REM Se arrivo qui, Python non c'è
+echo.
+echo [ERRORE] Python non trovato.
+echo Installa Python da: https://www.python.org/downloads/
+echo IMPORTANTE: Spunta "Add Python to PATH" durante l'installazione.
+pause
+exit /b
+
+:python_trovato
+echo    - Usiamo il comando: %PYTHON_CMD%
+
+REM --- 2. AMBIENTE VIRTUALE ---
+if exist "venv" goto venv_pronto
+echo.
+echo [2/4] Creo ambiente virtuale...
+%PYTHON_CMD% -m venv venv
+:venv_pronto
+
+REM --- 3. LIBRERIE ---
+echo.
+echo [3/4] Controllo librerie...
 call venv\Scripts\activate
 
-REM Controllo veloce se streamlit esiste, altrimenti installa tutto
 pip show streamlit >nul 2>&1
+if %errorlevel% equ 0 goto librerie_ok
+
+echo    - Installazione dipendenze in corso...
+pip install -r requirements.txt
 if %errorlevel% neq 0 (
-    echo    -> Installazione dipendenze in corso... (Potrebbe volerci un minuto)
-    pip install -r requirements.txt
-    if %errorlevel% neq 0 (
-        echo [ERRORE] Qualcosa e' andato storto nell'installazione delle librerie.
-        pause
-        exit
-    )
-) else (
-    echo    -> Librerie gia' installate.
+    echo [ERRORE] Installazione fallita.
+    pause
+    exit /b
 )
+:librerie_ok
 
-REM --- 4. CONFIGURAZIONE CHIAVE API (INTERATTIVA) ---
-echo [4/5] Controllo Chiave di Sicurezza...
-if not exist ".env" (
-    echo.
-    echo ========================================================
-    echo  ATTENZIONE: Manca la Chiave API di Google (Serve per l'IA)
-    echo ========================================================
-    echo.
-    echo  1. Vai su: https://aistudio.google.com/app/apikey
-    echo  2. Crea una chiave e copiala.
-    echo.
-    set /p APIKEY="Incolla qui la tua chiave (tasto destro per incollare) e premi INVIO: "
-    
-    REM Scriviamo la chiave nel file .env
-    echo GOOGLE_API_KEY=!APIKEY!> .env
-    
-    echo.
-    echo    -> Chiave salvata con successo!
-) else (
-    echo    -> File .env trovato. Procedo.
-)
+REM --- 4. CHIAVE E AVVIO ---
+echo.
+echo [4/4] Avvio...
 
-REM --- 5. AVVIO APP ---
-echo.
-echo [5/5] Avvio del programma...
-echo.
-echo ========================================================
-echo    PREMI CTRL+C NELLA FINESTRA NERA PER CHIUDERE
-echo ========================================================
-echo.
+if exist ".env" goto avvia_tutto
 
+echo.
+echo ========================================
+echo  MANCA LA CHIAVE GOOGLE (Solo prima volta)
+echo ========================================
+echo  Ottienila qui: https://aistudio.google.com/app/apikey
+echo.
+set /p APIKEY="Incolla la chiave e premi INVIO: "
+echo GOOGLE_API_KEY=%APIKEY%> .env
+
+:avvia_tutto
+cls
+echo Avvio del Quiz in corso...
 streamlit run src/app.py
-
 pause
