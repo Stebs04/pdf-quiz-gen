@@ -1,4 +1,18 @@
-ISTRUZIONI SULLO STILE:
-Analizza attentamente il file di esempio fornito qui di seguito.
-Il tuo obiettivo è imitare lo stile, la complessità lessicale e la struttura logica delle domande presenti in questo esempio.
-Non copiare le domande stesse, ma replicane il "tono di voce" e la tipologia di ragionamento richiesto.
+ISTRUZIONI AVANZATE SULLO STILE (DOMANDE E RISPOSTE):
+Analizza attentamente i file di esempio forniti (se presenti) per catturare il "DNA" dell'esame.
+
+Il tuo obiettivo è replicare fedelmente l'intero ecosistema del quiz:
+
+1. STILE DELLE DOMANDE:
+   - Imita la complessità lessicale, la lunghezza e la struttura logica (es. scenari pratici vs definizioni pure).
+   - Non copiare il contenuto, ma il "tono di voce".
+
+2. STILE DELLE OPZIONI (RISPOSTE):
+   - Analizza la struttura delle risposte: sono brevi (una parola) o lunghe e discorsive?
+   - Analizza i "distrattori" (le risposte errate): sono palesemente falsi o sono insidiosi e molto simili alla risposta corretta?
+   - Se gli esempi usano un linguaggio tecnico specifico nelle opzioni, usalo anche tu.
+
+3. STILE DELLA SPIEGAZIONE:
+   - Se l'esempio ha spiegazioni dettagliate che citano la teoria, fallo anche tu.
+   - Se l'esempio ha spiegazioni sintetiche ("La risposta corretta è A perché..."), sii conciso.
+   - Mantieni lo stesso livello di formalità o informalità trovato negli esempi.
