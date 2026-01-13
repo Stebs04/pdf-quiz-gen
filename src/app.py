@@ -202,7 +202,7 @@ if st.session_state.quiz_data is None:
 
                     # Step 5: Chiamata a Gemini
                     st.write("Generazione delle domande in corso...")
-                    model = genai.GenerativeModel('gemini-2.5-flash')
+                    model = genai.GenerativeModel('gemini-3-flash-preview')
                     res = model.generate_content(req)
                     
                     # Parsing risultato
