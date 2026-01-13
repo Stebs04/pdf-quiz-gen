@@ -66,14 +66,30 @@ def leggi_prompt(nome_file):
 
 def pulisci_json(testo_response):
     """
-    Pulisce l'output dell'IA. Estrae solo la lista pura [ ... ].
+    Pulisce l'output dell'IA. Estrae solo il PRIMO blocco JSON valido [ ... ].
+    Usa un contatore di parentesi per ignorare testo extra alla fine.
     """
+    # Rimuoviamo i marker del codice markdown se presenti
     testo_response = testo_response.replace("```json", "").replace("```", "")
+    
+    # Troviamo l'inizio della lista
     start = testo_response.find("[")
-    end = testo_response.rfind("]") + 1
-    if start != -1 and end != -1:
-        return testo_response[start:end]
-    return testo_response
+    if start == -1:
+        return "" # Nessun JSON trovato
+
+    # Algoritmo di bilanciamento parentesi per trovare la fine esatta
+    count = 0
+    for i, char in enumerate(testo_response[start:], start):
+        if char == "[":
+            count += 1
+        elif char == "]":
+            count -= 1
+            # Se il contatore torna a zero, abbiamo chiuso la lista principale
+            if count == 0:
+                return testo_response[start:i+1]
+                
+    # Fallback (se per caso le parentesi non sono bilanciate, ritorniamo tutto)
+    return testo_response[start:]
 
 # --- 3. GESTIONE STATO DELLA SESSIONE (MEMORIA) ---
 if "quiz_data" not in st.session_state: st.session_state.quiz_data = None
@@ -186,7 +202,7 @@ if st.session_state.quiz_data is None:
 
                     # Step 5: Chiamata a Gemini
                     st.write("Generazione delle domande in corso...")
-                    model = genai.GenerativeModel('gemini-3-flash-preview')
+                    model = genai.GenerativeModel('gemini-2.5-flash')
                     res = model.generate_content(req)
                     
                     # Parsing risultato
